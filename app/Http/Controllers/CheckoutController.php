@@ -7,17 +7,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
-use Cart;
-use Mail;
+use Gloudemans\Shoppingcart\Facades\Cart;
+use Illuminate\Support\Facades\Mail;
 use App\Mail\DemoEmail;
 use App\Mail\TestMail;
-
+use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
     public function AuthLogin()
     {
-        $login = Session::get('admin_id');
+        $login = Auth::id();
         if ($login) {
             return Redirect::to('/dashboard');
         } else {
@@ -47,13 +47,20 @@ class CheckoutController extends Controller
         $customer_password = md5($request->password_account);
         $result = DB::table('tbl_customer')->where('customer_email', $cutomer_email)
             ->where('customer_password', $customer_password)->first();
-        if ($result) {
+        // foreach($result as $item){
+        //     $lock =$item->lock_customer;
+        // }
+        $lock = $result->lock_customer;
+        if ($result && $lock != 1) {
             Session::put('customer_id', $result->customer_id);
             Session::put('customer_name', $result->customer_name);
             Session::put('customer_email', $result->customer_email);
             return Redirect::to('/trang-chu');
+        } elseif ($lock == 1) {
+            Session::put('message', 'Tài khoản của bạn đã bị khoá!');
+            return Redirect::to('/login-checkout');
         } else {
-            Session::put('message', 'Sai thong tin!');
+            Session::put('message', 'Tài khoản hoặc mật khẩu không đúng!');
             return Redirect::to('/login-checkout');
         }
     }
@@ -75,7 +82,7 @@ class CheckoutController extends Controller
             'customer_name' => 'required|max:100',
             'customer_email' => 'email|max:100',
             'customer_phone' => 'required|digits:10',
-            'customer_password' => 'required|max:255',
+            'customer_password' => 'required|max:30',
             'customer_repeat_password' => 'required|same:customer_password',
         ]);
     }
@@ -160,27 +167,101 @@ class CheckoutController extends Controller
     //     }
     // }
 
-    // public function manage_order()
-    // {
-    //     $this->AuthLogin();
-    //     $all_order = DB::table('tbl_order')->join('tbl_customer', 'tbl_customer.customer_id', '=', 'tbl_order.customer_id')
-    //         ->select('tbl_order.*', 'tbl_customer.customer_name')->get();
-    //     return view('admin.manage_order')->with('all_order', $all_order);
-    // }
+    public function manage_order()
+    {
+        $this->AuthLogin();
+        $all_order = DB::table('tbl_order')->join('tbl_customer', 'tbl_customer.customer_id', '=', 'tbl_order.customer_id')
+            ->select('tbl_order.*', 'tbl_customer.customer_name')->orderBy('tbl_order.order_id', 'desc')->paginate(10);
+        return view('admin.view_order')->with('all_order', $all_order);
+    }
+    public function edit_order($orderId)
+    {
+        $edit = DB::table('tbl_order')->where('order_id', $orderId)->get();
+        return view('admin.edit_order')->with('edit', $edit);
+    }
+    public function delete_order($orderId)
+    {
+        DB::table('tbl_order')->where('order_id', $orderId)->delete();
+        return Redirect::to('/manage-order');
+    }
+    public function update_order($orderId, Request $request)
+    {
+        $data['status'] = $request->status;
 
-    // public function view_order($orderId)
-    // {
-    //     $this->AuthLogin();
-    //     $order_id = DB::table('tbl_order')->join('tbl_customer', 'tbl_customer.customer_id', '=', 'tbl_order.customer_id')
-    //         ->join('tbl_shipping', 'tbl_shipping.shipping_id', '=', 'tbl_order.shipping_id')
-    //         ->join('tbl_order_details', 'tbl_order_details.order_id', '=', 'tbl_order.order_id')
-    //         ->where('tbl_order.order_id', $orderId)
-    //         ->get();
-    //     // echo "<pre>";
-    //     // print_r($order_id);
-    //     // echo "</pre>";
-    //     return view('admin.view_order')->with('order_id', $order_id);
-    // }
+        DB::table('tbl_order')->where('order_id', $orderId)->update($data);
+        if ($request->status == 'đang vận chuyển') {
+            $sales = 0;
+            $quantity = 0;
+            $total_order = 0;
+            $get_order =  DB::table('tbl_order')
+                ->join('tbl_order_details', 'tbl_order_details.order_id', '=', 'tbl_order.order_id')->where('tbl_order.order_id', $orderId)->get();
+
+            $count_prd = DB::table('tbl_order_details')->where('order_id', $orderId)->count();
+            $quantity += $count_prd;
+            $total_order = 1;
+
+            foreach ($get_order as $item) {
+
+                // $sales = $item->order_total;
+                $sales = $item->product_price * $item->product_quantity;
+                $get_date = $item->created_at;
+            }
+            $get_root_day = DB::table('tbl_statistical')->where('order_date', $get_date)->count();
+
+            if ($get_root_day > 0) {
+                $update_root = DB::table('tbl_statistical')->where('order_date', $get_date)->get();
+                foreach ($update_root as $itemm) {
+                    $root_sales = $itemm->sales;
+                    $root_quantity = $itemm->quantity;
+                    $root_total_order = $itemm->total_order;
+                    $dataa['sales'] =   $root_sales + $sales;
+                    $dataa['quantity'] =   $root_quantity + $quantity;
+                    $dataa['total_order'] =   $root_total_order + $total_order;
+                    DB::table('tbl_statistical')->where('order_date', $get_date)->update($dataa);
+                }
+            } else {
+                $get_order =  DB::table('tbl_order')
+                ->join('tbl_order_details', 'tbl_order_details.order_id', '=', 'tbl_order.order_id')->where('tbl_order.order_id', $orderId)->get();
+
+                $count_prd = DB::table('tbl_order_details')->where('order_id', $orderId)->count();
+                $quantity += $count_prd;
+                $total_order = 1;
+
+                foreach ($get_order as $item) {
+                    $sales = $item->product_price * $item->product_quantity;
+                    // $sales = $item->order_total;
+                    $order_date = $item->created_at;
+                }
+                $dataa['sales'] =   $sales;
+                $dataa['order_date'] =   $get_date;
+                $dataa['quantity'] =   $count_prd;
+                $dataa['total_order'] =   1;
+           
+                DB::table('tbl_statistical')->insert($dataa);
+            }
+
+            // return Redirect::to('/edit-order/' . $orderId);
+              return Redirect::to('/send-mail/'.$orderId);
+        }
+        Session::put('message', 'Cập nhật thành công !');
+        return Redirect::to('/edit-order/' . $orderId);
+    }
+
+
+
+    public function detail_order($orderId)
+    {
+        $this->AuthLogin();
+        $order_id = DB::table('tbl_order')->join('tbl_customer', 'tbl_customer.customer_id', '=', 'tbl_order.customer_id')
+            ->join('tbl_order_details', 'tbl_order_details.order_id', '=', 'tbl_order.order_id')
+            ->where('tbl_order.order_id', $orderId)
+            ->get();
+        // echo "<pre>";
+        // print_r($order_id);
+        // echo "</pre>";
+        // ->join('tbl_shipping', 'tbl_shipping.shipping_id', '=', 'tbl_order.shipping_id')
+        return view('admin.detail_order')->with('order_id', $order_id);
+    }
 
     // public function mail_order($orderId)
     // {
@@ -190,18 +271,17 @@ class CheckoutController extends Controller
     //     $email = DB::table('tbl_customer')->select('customer_email')->where('customer_id', $customer_id)->first();
     //     $email = $email->customer_email;
 
-    //     $order_id = DB::table('tbl_order')->join('tbl_customer', 'tbl_customer.customer_id', '=', 'tbl_order.customer_id')
-    //         ->join('tbl_shipping', 'tbl_shipping.shipping_id', '=', 'tbl_order.shipping_id')
+    //     $order_id = DB::table('tbl_order')
     //         ->join('tbl_order_details', 'tbl_order_details.order_id', '=', 'tbl_order.order_id')
     //         ->where('tbl_order.order_id', $orderId)
     //         ->get();
 
     //     Mail::to($email)->send(new DemoEmail($order_id));
-    //     $category_product = DB::table('tbl_category_product')->where('category_status', 1)->orderBy('category_id')->get();
-    //     $brand_product = DB::table('tbl_brand')->where('brand_status', 1)->orderBy('brand_id')->get();
-    //     return view('pages.checkout.handcash')->with('category', $category_product)
-    //         ->with('brand', $brand_product);
-    //     // return view('admin.send_mail')->with('demo', $order_id);
+    // $category_product = DB::table('tbl_category_product')->where('category_status', 1)->orderBy('category_id')->get();
+    // $brand_product = DB::table('tbl_brand')->where('brand_status', 1)->orderBy('brand_id')->get();
+    // return view('pages.checkout.handcash')->with('category', $category_product)
+    //     ->with('brand', $brand_product);
+    // return view('admin.send_mail')->with('demo', $order_id);
     // }  
     public function get_shipping()
     {
@@ -215,29 +295,104 @@ class CheckoutController extends Controller
         // $name = Session::get('customer_name');
         // $id = Session::get('customer_id');
         // $list_order = DB::table('tbl_order')->where('customer_id', $id)->get();
-        $list_tinh = DB::table('tbl_tinhthanhpho')->orderBy('matp','ASC')->get();     
+        $list_tinh = DB::table('tbl_tinhthanhpho')->orderBy('matp', 'ASC')->get();
 
         return view('pages.cart.get_shipping')->with('list_tinh', $list_tinh);
-        
+    }
+    public function display_other(Request $request)
+    {
+        $object = $request->object;
+        $out = '';
+        if ($object == "city") {
+            $select_provice = DB::table('tbl_quanhuyen')->where('matp', $request->matp)->orderBy('maqh', 'ASC')->get();
+            $out .= '   <option value="">Chọn quận huyện</option>';
+            foreach ($select_provice as $key => $item) {
+                $out .= '<option value=" ' . $item->maqh . ' ">' . $item->name_province . '</option>';
+            }
+        } else {
+            $select_ward = DB::table('tbl_xaphuongthitran')->where('maqh', $request->matp)->orderBy('xaid', 'ASC')->get();
+            $out .= '<option value="">Xã/phường/thị trấn</option>';
+            foreach ($select_ward as $key => $item) {
+                $out .= '
+           
+            <option value=" ' . $item->xaid . ' ">' . $item->name_ward . '</option>
+            ';
+            }
+        }
+        echo $out;
     }
 
 
     // }
-    public function info_shipping(Request $request)
+    public function info_shipping()
     {
         $customer_id = Session::get('customer_id');
+        // $data['receive_name'] = $request->full_name;
+        // $data['status'] = "chờ xác nhận";
+        // $data['customer_id'] = $customer_id;
+        // $data['order_phone']  = $request->phone;
+        // $data['order_email']   = $request->email;
+        // $data['adress']  = $request->addr;
+        // $data['order_note']  = $request->message;
+        // $data['order_total']  = Cart::subtotal();
+        // $data['created_at'] = Carbon::now();
+        // $content = Cart::content();
+        // $count = Cart::content()->count();
+        // DB::table('tbl_order')->insert($data);
+        // $order = DB::table('tbl_order')->where('customer_id', $customer_id)->orderBy('order_id','DESC')->first();
+        // $order_id = $order->order_id;
+        // foreach ($content as $item) {
+        //     $dataa['product_name'] = $item->name;
+        //     $dataa['product_id'] = $item->id;
+        //     $dataa['product_image'] = $item->options->image;
+        //     $dataa['product_quantity'] = $item->qty;
+        //     $dataa['product_price'] = $item->price;
+        //     $dataa['order_id'] = $order_id;
+        //     DB::table('tbl_order_details')->insert($dataa);
+        // }
+        // if ($count != 0) {
+        //     Session::put('message', 'Đặt hàng thành công !');
+        // } else {
+        //     Session::put('message', '');
+        // }
+
+        // Cart::destroy();
+
+        $list_order = DB::table('tbl_order')->where('customer_id', $customer_id)->orderBy('order_id', 'desc')->paginate(5);
+
+        return view('pages.cart.shipping_detail')->with('list_order', $list_order);
+    }
+    public function save_shipping(Request $request)
+    {
+        $get_ward = DB::table('tbl_xaphuongthitran')->where('xaid', $request->ward)->get();
+        $get_province = DB::table('tbl_quanhuyen')->where('maqh', $request->province)->get();
+        $get_city = DB::table('tbl_tinhthanhpho')->where('matp', $request->city)->get();
+
+        foreach ($get_ward as $item) {
+            $ward = $item->name_ward;
+        }
+        foreach ($get_province as $item) {
+            $province = $item->name_province;
+        }
+        foreach ($get_city as $item) {
+            $city = $item->name_city;
+        }
+        $detail_addr  = $request->addr . '-' . $ward . '-' . $province . '-' . $city;
+
+        $customer_id = Session::get('customer_id');
         $data['receive_name'] = $request->full_name;
+        $data['status'] = "chờ xác nhận";
         $data['customer_id'] = $customer_id;
         $data['order_phone']  = $request->phone;
         $data['order_email']   = $request->email;
-        $data['adress']  = $request->addr;
+        $data['adress']  =  $detail_addr;
         $data['order_note']  = $request->message;
         $data['order_total']  = Cart::subtotal();
-        $data['created_at'] = Carbon::now();
+        $data['created_at'] = Carbon::now('Asia/Ho_Chi_Minh')->toDateString();
         $content = Cart::content();
         $count = Cart::content()->count();
         DB::table('tbl_order')->insert($data);
-        $order = DB::table('tbl_order')->where('customer_id', $customer_id)->orderBy('order_id','DESC')->first();
+        $order = DB::table('tbl_order')->where('customer_id', $customer_id)->orderBy('order_id', 'DESC')->first();
         $order_id = $order->order_id;
         foreach ($content as $item) {
             $dataa['product_name'] = $item->name;
@@ -247,6 +402,12 @@ class CheckoutController extends Controller
             $dataa['product_price'] = $item->price;
             $dataa['order_id'] = $order_id;
             DB::table('tbl_order_details')->insert($dataa);
+            $get_number = DB::table('tbl_product')->where('product_id', $item->id)->get();
+            foreach ($get_number as $itemm) {
+                $number = $itemm->number_product;
+            }
+            $final_number = $number -  $dataa['product_quantity'];
+            DB::table('tbl_product')->where('product_id', $item->id)->update(['number_product' => $final_number]);
         }
         if ($count != 0) {
             Session::put('message', 'Đặt hàng thành công !');
@@ -255,20 +416,17 @@ class CheckoutController extends Controller
         }
 
         Cart::destroy();
-
-        $list_order = DB::table('tbl_order')->where('customer_id', $customer_id)->get();
-      
-        return view('pages.cart.shipping_detail')->with('list_order', $list_order);
+        Session::put('message', 'Đặt hàng thành công !');
+        return back();
     }
     public function display_history(Request $request)
     {
         $out = '';
         $order_id = $request->order_id;
-        $detail_history =DB::table('tbl_order_details')->where('order_id',$order_id)->get();
-        
-    foreach($detail_history as $item)
-    {
-        $out .='
+        $detail_history = DB::table('tbl_order_details')->where('order_id', $order_id)->get();
+
+        foreach ($detail_history as $item) {
+            $out .= '
       
         <table class="table table-striped">
         <thead>
@@ -282,21 +440,79 @@ class CheckoutController extends Controller
         </thead>
         <tbody>
             <tr> 
-               <th scope="row">'.$item->product_name.'</th>
-                <td><img  style="max-width: 200px;" src=" '. url('public/uploads/product/'.$item->product_image).' " alt=""></td>
-                <td>'.$item->product_quantity.'</td>
-                <td> '.number_format($item->product_price).' VNĐ</td>
+               <th scope="row" style="vertical-align: inherit;font-family: arial, sans-serif;">' . $item->product_name . '</th>
+                <td><img  style="max-width: 200px;" src=" ' . url('public/uploads/product/' . $item->product_image) . ' " alt=""></td>
+                <td>' . $item->product_quantity . '</td>
+                <td> ' . number_format($item->product_price) . ' VNĐ</td>
                
                
             </tr>
         </tbody>
         </table>
       
-        <a class="btn btn_back" href="'.url('get-shipping').'">Trở về</a>
+    
         
       
               ';
+        }
+        $out =$out.'
+        <a class="btn btn_back" href="' . url('info-shipping') . '">Trở về</a>
+        ';
+        echo $out;
     }
-    echo $out;
+    public function confirm_order($orderId)
+    {
+        DB::table('tbl_order')->where('order_id', $orderId)->update(['status' => 'đã nhận hàng']);
+        Session::put('message', 'Đã cập nhật thông tin ! ');
+        return back();
     }
+    public function cancel_order($orderId)
+    {
+        DB::table('tbl_order')->where('order_id', $orderId)->update(['status' => 'huỷ đơn']);
+        $return_number = DB::table('tbl_order_details')->where('order_id', $orderId)->get();
+        foreach ($return_number as $item) {
+            $get_number = $item->product_quantity;
+            $get_id = $item->product_id;
+            $first_number = DB::table('tbl_product')->where('product_id', $get_id)->get();
+            foreach ($first_number as $itemm) {
+                $fnumber = $itemm->number_product;
+            }
+            $final_number = $fnumber + $get_number;
+            DB::table('tbl_product')->where('product_id', $get_id)->update(['number_product' => $final_number]);
+        }
+
+        Session::put('message', 'Đã cập nhật thông tin ! ');
+        return back();
+    }
+    public function person_info(){
+    $take_avt= DB::table('tbl_customer')->where('customer_id',Session::get('customer_id'))->get();
+    return view('pages.checkout.personal_info')->with('avt',$take_avt);
+    }
+    public function update_profile(Request $request){
+      $data['customer_name']=$request->name;
+      $data['customer_email']=$request->email;
+      $data['customer_phone']=$request->phone;
+      $get_image = $request->file('avatar');
+        if ($get_image) {
+            $get_name_image = $get_image->getClientOriginalName();
+            $name_image = current(explode('.', $get_name_image));
+            $new_image = $name_image . rand(0, 99) . '.' . $get_image->getClientOriginalExtension();
+            $get_image->move('public/uploads/avatar', $new_image);
+            $data['customer_avt'] = $new_image;
+        }
+      DB::table('tbl_customer')->where('customer_id',Session::get('customer_id'))->update($data);
+      return Redirect()->back()->with('message','Cập nhật thông tin thành công !');
+    }
+public function update_password(Request $request){
+    if($request->pass == $request->cfpass){
+        $data['customer_password']=md5($request->pass);
+        DB::table('tbl_customer')->where('customer_id',Session::get('customer_id'))->update($data);
+    }else{
+        return Redirect()->back()->with('message','Thông tin mật khẩu không hợp lệ !');
+    }
+    return Redirect()->back()->with('message','Đổi thành công !');
+   
+   
+}
+    
 }

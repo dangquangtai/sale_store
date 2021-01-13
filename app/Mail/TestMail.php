@@ -35,7 +35,7 @@ class TestMail extends Mailable
      */
     public function build()
     {
-        return $this->from('lvtan.19it1@vku.udn.vn')->subject("Shop VanTan ^-^")
+        return $this->from('dqtai.19it1@vku.udn.vn')->subject("Send from FURN")
             ->view('admin.test_mail');
             // ->text('admin.text_mail')
             // ->with(

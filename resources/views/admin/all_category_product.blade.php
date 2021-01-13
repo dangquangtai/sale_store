@@ -27,14 +27,18 @@
                 </div>
                 <div class="col-sm-4">
                 </div>
+               <form action="search-catename" method="get">
+                @csrf
                 <div class="col-sm-3">
                     <div class="input-group">
-                        <input type="text" class="input-sm form-control" placeholder="Search">
+                        <input type="text" class="input-sm form-control" name="cate_name" placeholder="Search" required>
                         <span class="input-group-btn">
-                            <button class="btn btn-sm btn-default" type="button">Go!</button>
+                            <button class="btn btn-sm btn-default" type="submit">Go!</button>
                         </span>
                     </div>
                 </div>
+        
+               </form>
             </div>
             <div class="table-responsive">
                 <table class="table table-striped b-t b-light">
@@ -72,7 +76,7 @@
                                     <a href="{{ URL::to('/edit-category-product/' . $cate_pro->category_id) }}"
                                         class="active" ui-toggle-class=""><i
                                             class="fa fa-pencil-square-o text-success text-active"></i></a>
-                                    <a href="{{ URL::to('/delete-category-product/' . $cate_pro->category_id) }}"><i
+                                    <a href="{{ URL::to('/delete-category-product/' . $cate_pro->category_id) }}" ><i
                                             class="fa fa-times text-danger text"></i></a>
 
                                 </td>
@@ -89,15 +93,9 @@
                         <small class="text-muted inline m-t-sm m-b-sm">showing 20-30 of 50 items</small>
                     </div>
                     <div class="col-sm-7 text-right text-center-xs">
-                        <ul class="pagination pagination-sm m-t-none m-b-none">
-                            <li><a href=""><i class="fa fa-chevron-left"></i></a></li>
-                            <li><a href="">1</a></li>
-                            <li><a href="">2</a></li>
-                            <li><a href="">3</a></li>
-                            <li><a href="">4</a></li>
-                            <li><a href=""><i class="fa fa-chevron-right"></i></a></li>
-                        </ul>
-                    </div>
+                    <span>{!! $all_category_product->render('vendor.pagination.name') !!}</span>
+                    
+                </div>
                 </div>
             </footer>
         </div>

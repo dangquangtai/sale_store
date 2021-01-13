@@ -219,101 +219,108 @@
 <script>
     $(function() {
 
-                $('.edit-cart').click(function() {
+        $('.edit-cart').click(function() {
 
-                    var rowid = $(this).data('rowid');
+            var rowid = $(this).data('rowid');
 
-                    var _token = $("input[name='_token']").val();
-                    var this_row = $(this).parent().parent();
-                    $.ajax({
-                        type: "POST",
-                        cache: false,
-                        url: "{{url('/delete-cart-product')}}",
-                        data: {
-                            rowId: rowid,
-                            _token: _token
+            var _token = $("input[name='_token']").val();
+            var this_row = $(this).parent().parent();
+            $.ajax({
+                type: "POST",
+                cache: false,
+                url: "{{url('/delete-cart-product')}}",
+                data: {
+                    rowId: rowid,
+                    _token: _token
 
-                        },
-                        dataType: "html",
-                        success: function(data) {
-                            this_row.remove();
-                            $('#received').html(data);
-
-
-                            var a = $('#recount').val();
-                            if (a) {
-                                $('#product_count').html(a);
-                            } else {
-                                $('#product_count').html('0');
-                            }
-                            var b = $('#retotal').val();
-                            if (b) {
-                                $('.sub-total').html(b);
-                            } else {
-                                $('.sub-total').html('0');
-                            }
-                        }
-                    });
+                },
+                dataType: "html",
+                success: function(data) {
+                    this_row.remove();
+                    $('#received').html(data);
 
 
-                });
-
-
-
-                $('.checkout_btn').click(function() {
-                    $count = $('#count').val();
-                    if ($count == 0) {
-                        alert('Giỏ hàng bạn đang trống...vui lòng kiểm tra')
-
-
-
+                    var a = $('#recount').val();
+                    if (a) {
+                        $('#product_count').html(a);
                     } else {
-                        window.location.href = "  {{URL::to('/get-shipping')}} ";
-
+                        $('#product_count').html('0');
                     }
-                });
+                    var b = $('#retotal').val();
+                    if (b) {
+                        $('.sub-total').html(b);
+                    } else {
+                        $('.sub-total').html('0');
+                    }
+                }
+            });
+
+
+        });
+
+
+
+        $('.checkout_btn').click(function() {
+            $count = $('#count').val();
+            if ($count == 0) {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Giỏ hàng bạn đang trống...vui lòng kiểm tra',
+                    footer: '<a href>Why do I have this issue?</a>'
+                })
 
 
 
 
-                $('.input-number').change(function() {
-                        var qty = $(this).parent().parent().children().find('.input-number').val();
+            } else {
+                window.location.href = "  {{URL::to('/get-shipping')}} ";
 
-                        var rowid = $(this).data('rowid');
-                        var _token = $("input[name='_token']").val();
-                        // alert(qty+" "+rowid+" "+_token)
-                        var this_row = $(this).parent().parent().parent();
-                        $.ajax({
-                                type: "POST",
-                                cache: false,
-                                url: "{{url('/update-cart-quantity')}}",
-                                data: {
-                                    rowId: rowid,
-                                    quantity: qty,
-                                    _token: _token
-                                },
-                                dataType: "json",
-                                success: function(data) {
-                                    $('.sub-total').html(data.subtotal);
-                                    var price = this_row.children().find('.p-price').data('price');
-                                    //    alert(price)
-                                    var x = qty * price;
-                                    var value = x.toLocaleString(
-                                        undefined, // leave undefined to use the browser's locale,
-                                        // or use a string like 'en-US' to override it.
-                                        {
-                                            minimumFractionDigits: 2
-                                        }
-                                    );
-                                        this_row.children().find('.p-total').text(value);
-                                    }
-                                });
-                            return false;
-                        });
+            }
+        });
 
 
 
-                });
+
+        $('.input-number').change(function() {
+            var qty = $(this).parent().parent().children().find('.input-number').val();
+
+            var rowid = $(this).data('rowid');
+            var _token = $("input[name='_token']").val();
+            // alert(qty+" "+rowid+" "+_token)
+            var this_row = $(this).parent().parent().parent();
+            $.ajax({
+                type: "POST",
+                cache: false,
+                url: "{{url('/update-cart-quantity')}}",
+                data: {
+                    rowId: rowid,
+                    quantity: qty,
+                    _token: _token
+                },
+                dataType: "json",
+                success: function(data) {
+                    $('.sub-total').html(data.subtotal);
+                    var price = this_row.children().find('.p-price').data('price');
+                    //    alert(price)
+                    var x = qty * price;
+                    var value = x.toLocaleString(
+                        undefined, // leave undefined to use the browser's locale,
+                        // or use a string like 'en-US' to override it.
+                        {
+                            minimumFractionDigits: 2
+                        }
+                    );
+                    this_row.children().find('.p-total').text(value);
+                }
+            });
+            return false;
+        });
+
+
+
+    });
 </script>
 @endpush
 

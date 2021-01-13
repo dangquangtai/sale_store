@@ -3144,6 +3144,7 @@ hr {
     background-image: url(../img/hero/h1_hero.png)
 }
 
+
 .slider-bg2 {
     background-image: url(../img/hero/h2_hero1.png)
 }
@@ -3250,12 +3251,12 @@ hr {
 }
 
 .slider-area .hero__caption span {
-    color: #7F85A8;
-    font-size: 26px;
+    color: #000000;
+    /* font-size: 26px; */
     font-weight: 600;
     margin-bottom: 8px;
     display: block;
-    text-transform: uppercase
+    /* text-transform: uppercase */
 }
 
 .slider-area .hero__caption h1 {

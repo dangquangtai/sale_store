@@ -3,9 +3,23 @@
 <section class="checkout_area section-padding40">
     <div class="container">
         <div class="row">
+        <?php
+
+use Illuminate\Support\Facades\Session;
+
+$message = Session::get('message');
+?>
+<span style="color: green;">
+    <?php
+    if ($message) {
+        echo $message;
+        Session::put('message', NULL);
+    }
+    ?>
+</span>
             <div class="col-lg-8">
                 <h3>Điền thông tin để hoàn thành thủ tục đặt hàng</h3>
-                <form class="row contact_form" action="{{ URL::to('info-shipping') }}" method="post" name="validate_form">
+                <form class="row contact_form" action="{{ URL::to('save-shipping') }}" method="post" name="validate_form">
                     @csrf
                     <div class="col-md-12 form-group p_star">
                         <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Your full name" data-required>
@@ -23,9 +37,9 @@
                         <input type="email" class="form-control" id="email" name="email" placeholder="Email Address">
 
                     </div>
-                    <div class="col-md-12 form-group p_star">
-                        <select class="country_select choose" id="city">
-                            <option value="" >Chọn tỉnh/thành phố</option>
+                    <div class="col-md-4 form-group p_star">
+                        <select class=" custom-select  form-control form-control-lg  country_select choose" id="city" name="city">
+                            <option value="">Chọn tỉnh/thành phố</option>
                             @foreach($list_tinh as $key=>$item)
                             <option value="{{$item->matp}}">{{ $item->name_city }}</option>
 
@@ -34,6 +48,22 @@
                         </select>
 
                     </div>
+
+                    <div class="col-md-4 form-group p_star">
+                        <select class="custom-select  form-control form-control-lg  choose district_select" id="province" name="province">
+                        <option value="">Chọn quận/huyện</option>
+                            
+                        </select>
+                       
+                    </div>
+                    <div class="col-md-4 form-group p_star ">
+                    <select class="custom-select  form-control form-control-lg  ward_select" id="ward" name="ward">
+                    <option value="">Xã/phường/thị trấn</option>
+                            
+                        </select>
+                        
+                    </div>
+
                     <div class="col-md-12 form-group p_star">
                         <input type="text" class="form-control" id="addr" name="addr" placeholder="Detail address" />
 
@@ -46,13 +76,7 @@
                         <input type="text" class="form-control" id="city" name="city" placeholder="Town/City"/>
                      
                     </div> -->
-                    <div class="col-md-12 form-group p_star">
-                        <select class="district_select">
-                            <option value="1">District</option>
-                            <!-- <option value="2">District</option>
-                                        <option value="4">District</option> -->
-                        </select>
-                    </div>
+
                     <!-- <div class="col-md-12 form-group">
                                     <input type="text" class="form-control" id="zip" name="zip" placeholder="Postcode/ZIP" />
                                    
@@ -161,34 +185,40 @@
 </section>
 @push('ajax-place')
 <script>
-   
     $(document).on('change', '.choose', function() {
         var object = $(this).attr('id');
-var action = $(this).val();
-var _token = $("input[name='_token']").val();
-var result = '';
-if (action == 'city') {
-result = 'provice';
-} else {
-result = 'wards';
-}
-$.ajax({
-type: "POST",
-cache: false,
-url: "{{url('/display-history')}}",
-data: {
-object: object,
-id: id,
-_token: _token
-},
-dataType: "html",
-success: function(data) {
-// $('.contain').html(data);
+        var matp = $(this).val();
+        var _token = $("input[name='_token']").val();
+        var result = '';
+        var x = '';
+        if (object == 'city') {
+            result = 'district_select';
+            x = 'province';
+        } else {
+            result = 'ward_select';
+            x = 'ward';
+        }
+        $.ajax({
+            type: "POST",
+            cache: false,
+            url: "{{url('/display-other')}}",
+            data: {
+                object: object,
+                matp: matp,
+                _token: _token
+            },
+            dataType: "html",
+            success: function(data) {
+                $('#' + x).html(data);
+                // $('.' + result +" " +'ul').html(data);
 
-}
-});
-return false;
-});
+                // $('.district_select ul').html(data);
+                console.log(data);
+
+            }
+        });
+        return false;
+    });
 </script>
 
 @endpush

@@ -120,11 +120,11 @@
 
     
 
-/* 6. Nice Selectorp  */
-  var nice_Select = $('select');
-    if(nice_Select.length){
-      nice_Select.niceSelect();
-    }
+// /* 6. Nice Selectorp  */
+//   var nice_Select = $('select');
+//     if(nice_Select.length){
+//       nice_Select.niceSelect();
+//     }
 
 
 

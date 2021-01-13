@@ -27,14 +27,17 @@
                 </div>
                 <div class="col-sm-4">
                 </div>
-                <div class="col-sm-3">
+                <form action="search-brand" method="get">
+                    @csrf
+                    <div class="col-sm-3">
                     <div class="input-group">
-                        <input type="text" class="input-sm form-control" placeholder="Search">
+                        <input type="text" class="input-sm form-control" name="brand_name" placeholder="Search" required>
                         <span class="input-group-btn">
-                            <button class="btn btn-sm btn-default" type="button">Go!</button>
+                            <button class="btn btn-sm btn-default" type="submit">Go!</button>
                         </span>
                     </div>
                 </div>
+                </form>
             </div>
             <div class="table-responsive">
                 <table class="table table-striped b-t b-light">
@@ -89,15 +92,9 @@
                         <small class="text-muted inline m-t-sm m-b-sm">showing 20-30 of 50 items</small>
                     </div>
                     <div class="col-sm-7 text-right text-center-xs">
-                        <ul class="pagination pagination-sm m-t-none m-b-none">
-                            <li><a href=""><i class="fa fa-chevron-left"></i></a></li>
-                            <li><a href="">1</a></li>
-                            <li><a href="">2</a></li>
-                            <li><a href="">3</a></li>
-                            <li><a href="">4</a></li>
-                            <li><a href=""><i class="fa fa-chevron-right"></i></a></li>
-                        </ul>
-                    </div>
+                    <span>{!! $all_brand_product->render('vendor.pagination.name') !!}</span>
+                    
+                </div>
                 </div>
             </footer>
         </div>

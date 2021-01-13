@@ -7,12 +7,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use App\Models\Brand;
+use Illuminate\Support\Facades\Auth;
 
 class BrandProduct extends Controller
 {
     public function AuthLogin()
     {
-        $login = Session::get('admin_id');
+        $login = Auth::id();
         if ($login) {
             return Redirect::to('/dashboard');
         } else {
@@ -28,7 +29,7 @@ class BrandProduct extends Controller
     {
         $this->AuthLogin();
         // $all = DB::table('tbl_brand')->get();
-        $all = Brand::all();
+        $all = Brand::paginate(6);
         // $all = Brand::orderBy('brand_id','desc')->take(2)->get();
         $manager = view('admin.all_brand_product')->with('all_brand_product', $all);
         return view('admin_layout')->with('admin.all_brand_product', $manager);
@@ -94,6 +95,7 @@ class BrandProduct extends Controller
     {
         $this->AuthLogin();
         DB::table('tbl_brand')->where('brand_id', $brand_product_id)->delete();
+        DB::table('tbl_product')->where('brand_id', $brand_product_id)->delete();
         Session::put('message', 'Xoá thương hiệu sản phẩm thành công');
         return Redirect::to('/all-brand-product');
     }
@@ -102,8 +104,33 @@ class BrandProduct extends Controller
     {
         $category_product = DB::table('tbl_category_product')->where('category_status', 1)->orderBy('category_id')->get();
         $brand_product = DB::table('tbl_brand')->where('brand_status', 1)->orderBy('brand_id')->get();
-        $this_brand = DB::table('tbl_brand')->where('brand_id', $brand_id)->get();
-        $all = DB::table('tbl_product')->join('tbl_brand', 'tbl_product.brand_id', '=', 'tbl_brand.brand_id')->where('tbl_brand.brand_id', $brand_id)->get();
-        return view('pages.brand.show_brand')->with('category', $category_product)->with('brand', $brand_product)->with('all_brand', $all)->with('this_brand', $this_brand);
+        $this_category =0;
+        $this_brand = DB::table('tbl_brand')->where('brand_status',1)->where('brand_id', $brand_id)->first()->brand_id;
+        $all = DB::table('tbl_product')->join('tbl_brand', 'tbl_product.brand_id', '=', 'tbl_brand.brand_id')
+        ->join('tbl_product_img','tbl_product_img.product_id','=','tbl_product.product_id')
+        ->where('tbl_product_img.img_status',1)
+        ->where('tbl_brand.brand_id', $brand_id)->paginate(6);
+        return view('pages.product.all_product')->with('category', $category_product)->with('brand', $brand_product)->with('product', $all)->with('this_brand', $this_brand)->with('this_category', $this_category);
+   
     }
+    public function search_brand(Request $request){
+        $this->AuthLogin();
+        $search_admin_product = DB::table('tbl_brand')
+        ->where('brand_status', 1)->where('brand_name', 'like', '%' . $request->brand_name . '%')->paginate(6);
+        return view('admin.all_brand_product')
+           ->with('all_brand_product', $search_admin_product);
+    }
+    public function show_category_home($category_id)
+    {
+      
+        $category_product = DB::table('tbl_category_product')->where('category_status', 1)->orderBy('category_id')->get();
+        $brand_product = DB::table('tbl_brand')->where('brand_status', 1)->orderBy('brand_id')->get();
+        $content_slider =DB::table('tbl_slider_content')->get();
+        $this_category = DB::table('tbl_category_product')->where('category_id', $category_id)->first()->category_id;
+       $this_brand =0;
+        $all = DB::table('tbl_product')->join('tbl_category_product', 'tbl_product.category_id', '=', 'tbl_category_product.category_id')
+        ->join('tbl_product_img','tbl_product_img.product_id','=','tbl_product.product_id')->where('tbl_product_img.img_status',1)->where('tbl_category_product.category_id', $category_id)->paginate(6);
+        return view('pages.product.all_product')->with('category', $category_product)->with('brand', $brand_product)->with('content_slider',$content_slider)->with('product', $all)->with('this_category', $this_category)->with('this_brand',$this_brand);
+    }
+ 
 }

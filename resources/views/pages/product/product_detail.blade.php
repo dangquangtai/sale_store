@@ -1,5 +1,50 @@
 @extends('layout')
 @section('content')
+<style>
+    .stars input {
+        position: absolute;
+        left: -999999px;
+    }
+
+    .stars a {
+        display: inline-block;
+        padding-right: 4px;
+        text-decoration: none;
+        margin: 0;
+    }
+
+    .stars a:after {
+        position: relative;
+        font-size: 18px;
+        font-family: 'FontAwesome', serif;
+        display: block;
+        content: "\f005";
+        color: #84805e;
+    }
+
+
+    /* span {
+        font-size: 0;
+        
+    } */
+
+    .stars a:hover~a:after {
+        color: #9e9e9e !important;
+    }
+
+    span.active a.active~a:after {
+        color: #9e9e9e;
+    }
+
+    span:hover a:after {
+        color: #dfeb2a !important;
+    }
+
+    span.active a:after,
+    .stars a.active:after {
+        color: #dfeb2a;
+    }
+</style>
 <main>
     <!--? slider Area Start-->
     <div class="slider-area ">
@@ -25,6 +70,13 @@
     </div>
     <!-- slider Area End-->
     <!--? Single Product Area Start-->
+    <?php
+
+    use Illuminate\Support\Facades\Session;
+
+    $user_id = Session::get('customer_id');
+    ?>
+    <input type="hidden" id="user_id" value="<?php echo $user_id ?>">
     @foreach ($detail_product as $item)
 
 
@@ -34,10 +86,12 @@
                 <div class="col-lg-5">
                     <div class="product_slider_img">
                         <div id="vertical">
-                            <div data-thumb="{{ URL::asset('public/uploads/product/'.$item->product_image) }}">
-                                <img src="{{ URL::asset('public/uploads/product/'.$item->product_image) }}" class="w-100">
+                            @foreach($get_product_img as $itemm)
+                            <div data-thumb="{{ URL::asset('public/uploads/product/'.$itemm->product_image) }}">
+                                <img src="{{ URL::asset('public/uploads/product/'.$itemm->product_image) }}" class="w-100">
                             </div>
-                            <div data-thumb="{{ URL::asset('public/frontend/assets/img/gallery/product-details2.png') }}">
+                            @endforeach
+                            <!-- <div data-thumb="{{ URL::asset('public/frontend/assets/img/gallery/product-details2.png') }}">
                                 <img src="{{ URL::asset('public/frontend/assets/img/gallery/product-details2.png') }}" class="w-100">
                             </div>
                             <div data-thumb="{{ URL::asset('public/frontend/assets/img/gallery/product-details3.png') }}">
@@ -46,6 +100,12 @@
                             <div data-thumb="{{ URL::asset('public/frontend/assets/img/gallery/product-details4.png') }}">
                                 <img src="{{ URL::asset('public/frontend/assets/img/gallery/product-details4.png') }}" class="w-100">
                             </div>
+                            <div data-thumb="{{ URL::asset('public/frontend/assets/img/gallery/product-details4.png') }}">
+                                <img src="{{ URL::asset('public/frontend/assets/img/gallery/product-details4.png') }}" class="w-100">
+                            </div>
+                            <div data-thumb="{{ URL::asset('public/frontend/assets/img/gallery/product-details4.png') }}">
+                                <img src="{{ URL::asset('public/frontend/assets/img/gallery/product-details4.png') }}" class="w-100">
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -56,24 +116,30 @@
                         <h2>{{ number_format($item->product_price)}} VNĐ</h2>
                         <ul class="list">
                             <li>
+
                                 <a class="active" href="{{ URL::to('/danh-muc-san-pham/'.$item->category_id) }}">
-                                    <span>Category</span> : {{ $item->category_name }}</a>
+                                    Category : {{ $item->category_name }}</a>
                             </li>
                             <li>
-                                <a href="" class="disable"><span>Brand</span> : {{ $item->brand_name }}</a>
+                                <a href="" class="disable">Brand : {{ $item->brand_name }}</a>
 
                             </li>
                             <li>
-                                <a href="#" class="disable"> <span>Availibility</span> : In Stock</a>
+                                <a href="#" class="disable"> Availibility : <?php
+                                                                            if ($item->number_product == 0) {
+                                                                                echo 'Hết sản phẩm';
+                                                                            } else echo $item->number_product;
+                                                                            ?></a>
                             </li>
                         </ul>
                         <p>
                             {!! $item->product_desc !!}
                         </p>
+                        <input type="number" id="number_prd" value="{{$item->number_product}}" hidden>
                         <div class="card_area">
                             <div class="product_count d-inline-block">
                                 <span class="inumber-decrement"> <i class="ti-minus"></i></span>
-                                <input class="input-number" type="text" value="1" min="1" max="50" disabled>
+                                <input class="input-number" type="text" value="1" min="1" max="{{$item->number_product}}" readonly>
                                 <span class="number-increment"> <i class="ti-plus"></i></span>
                             </div>
                             <div class="add_to_cart">
@@ -109,9 +175,9 @@
                 <li class="nav-item">
                     <a class="nav-link active" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Comments</a>
                 </li>
-                <!-- <li class="nav-item">
-                    <a class="nav-link active" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review" aria-selected="false">Reviews</a>
-                </li> -->
+                <li class="nav-item">
+                    <a class="nav-link " id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review" aria-selected="false">Reviews</a>
+                </li>
             </ul>
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -239,7 +305,7 @@
                                 <form class="row contact_form" action="" method="post" id="contactForm" novalidate="novalidate">
 
                                 </form>
-                                <div class="col-md-12">
+                                <!-- <div class="col-md-12">
                                     <div class="form-group">
                                         <input type="text" class="form-control" id="name" name="name" placeholder="Your Full name" required />
                                     </div>
@@ -253,19 +319,20 @@
                                     <div class="form-group">
                                         <input type="text" class="form-control" id="number" name="number" placeholder="Phone Number" />
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <textarea class="form-control" name="message" id="message" rows="1" placeholder="Message" required></textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-12 text-right">
-                                    <button style="display: none;" value="0" data-name_coment="a" class="btn " id="reply_coment">
+                                    <button name="replycmt" value="0" data-customer_id="0" class="btn" id="reply_coment" style="display: none;">
                                         Reply Now
                                     </button>
                                     <button value="0" class="btn " id="send_coment">
                                         Submit Now
                                     </button>
+                                    <!-- <a href="{{URL::to('/load-coment')}}" class="btn">test</a> -->
                                 </div>
 
                             </div>
@@ -332,7 +399,7 @@
                                 </div>
                             </div>
                             <div class="review_list">
-                                <div class="review_item">
+                                <!-- <div class="review_item">
                                     <div class="media">
                                         <div class="d-flex">
                                             <img src="assets/img/gallery/review-1.png" alt="" />
@@ -352,108 +419,40 @@
                                         aliqua. Ut enim ad minim veniam, quis nostrud exercitation
                                         ullamco laboris nisi ut aliquip ex ea commodo
                                     </p>
-                                </div>
-                                <div class="review_item">
-                                    <div class="media">
-                                        <div class="d-flex">
-                                            <img src="assets/img/gallery/review-2.png" alt="" />
-                                        </div>
-                                        <div class="media-body">
-                                            <h4>Blake Ruiz</h4>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                    </div>
-                                    <p>
-                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                                        sed do eiusmod tempor incididunt ut labore et dolore magna
-                                        aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                                        ullamco laboris nisi ut aliquip ex ea commodo
-                                    </p>
-                                </div>
-                                <div class="review_item">
-                                    <div class="media">
-                                        <div class="d-flex">
-                                            <img src="assets/img/gallery/review-3.png" alt="" />
-                                        </div>
-                                        <div class="media-body">
-                                            <h4>Blake Ruiz</h4>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                    </div>
-                                    <p>
-                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                                        sed do eiusmod tempor incididunt ut labore et dolore magna
-                                        aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                                        ullamco laboris nisi ut aliquip ex ea commodo
-                                    </p>
-                                </div>
+                                </div> -->
+
+
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="review_box">
                                 <h4>Add a Review</h4>
                                 <p>Your Rating:</p>
-                                <ul class="list">
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-star"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-star"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-star"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-star"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-star"></i>
-                                        </a>
-                                    </li>
-                                </ul>
+
+                                <p class="stars">
+                                    <span>
+                                        <a class="star star-1 " value="1" href="#">1</a>
+                                        <a class="star star-2 " value="2" href="#">2</a>
+                                        <a class="star star-3 " value="3" href="#">3</a>
+                                        <a class="star star-4 " value="4" href="#">4</a>
+                                        <a class="star star-5 " value="5" href="#">5</a>
+                                    </span>
+                                </p>
                                 <p>Outstanding</p>
-                                <form class="row contact_form" action="contact_process.php" method="post" novalidate="novalidate">
+                                <form class="row contact_form" action="" novalidate="novalidate">
+                                    @csrf
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="name" placeholder="Your Full name" />
+                                            <textarea class="form-control" name="message" id="review_rating" rows="1" placeholder="Review"></textarea>
                                         </div>
                                     </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <input type="email" class="form-control" name="email" placeholder="Email Address" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" name="number" placeholder="Phone Number" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <textarea class="form-control" name="message" rows="1" placeholder="Review"></textarea>
-                                        </div>
-                                    </div>
+                                    <input type="text" name="rating" id="rating" value="0" hidden>
                                     <div class="col-md-12 text-right">
-                                        <button type="submit" value="submit" class="btn">
+                                        <a type="submit" data-ordered="<?php echo $ordered ?>"class="btn rating_btn" data-rating_star="0">Submit now</a>
+                                        <!-- <button type="submit" value="<?php echo $ordered ?>" class="btn rating_btn" data-rating_star="0">
                                             Submit Now
-                                        </button>
+                                        </button> -->
+
                                     </div>
                                 </form>
                             </div>
@@ -522,6 +521,7 @@
 <script>
     $(document).ready(function() {
         load_coment();
+        load_rating();
 
         function load_coment() {
             var prd_id = $('.product_id').val();
@@ -551,73 +551,119 @@
 
 
         $('#send_coment').click(function() {
+            var user_id = $('#user_id').val();
+            if (user_id) {
 
-            var name = $('#name').val();
-            var email = $('#email').val();
-            var phone = $('#number').val();
-            var coment = $('#message').val();
-            var prd_id = $('.product_id').val();
-            var _token = $("input[name='_token']").val();
-            if (name == '' || coment == '') {
-                alert('Cần điền đầy đủ thông tin');
-                return false;
-            }
-            $.ajax({
-                type: "POST",
-                cache: false,
-                url: "{{url('/post-coment')}}",
-                data: {
-                    product_id: prd_id,
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    coment: coment,
+                var coment = $('#message').val();
+                var prd_id = $('.product_id').val();
+                var _token = $("input[name='_token']").val();
+                if (coment == '') {
 
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Nội dung bình luận trống !',
+                        footer: '<a href>Why do I have this issue?</a>'
+                    })
 
-                    _token: _token
-
-
-                },
-                dataType: "html",
-                success: function(data) {
-                    // alert(data);
-                    $('#show_coment').html(data);
-                    console.log(data);
-                    $("#name").val('');
-                    $("#email").val('');
-                    $("#number").val('');
-                    $("#message").val('');
+                    return false;
                 }
-            });
-            // alert()
-            return false;
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: "{{url('/post-coment')}}",
+                    data: {
+                        product_id: prd_id,
+                        user_id: user_id,
+                        coment: coment,
+
+
+                        _token: _token
+
+
+                    },
+                    dataType: "html",
+                    success: function(data) {
+                        // alert(data);
+                        $('#show_coment').html(data);
+                        console.log(data);
+                        $("#name").val('');
+                        $("#email").val('');
+                        $("#number").val('');
+                        $("#message").val('');
+                    }
+                });
+                // alert()
+                return false;
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Bạn cần đăng nhập để đăng bình luận !',
+                    footer: '<a href>Why do I have this issue?</a>'
+                })
+                // alert('Bạn cần đăng nhập để đăng bình luận !');
+            }
+
         });
 
 
 
         $(document).on('click', 'a.add-to-cart', function() {
-            var qty = $('input.input-number').val();
-            var id = $(this).data('productid');
-            var _token = $("input[name='_token']").val();
+            var user_id = $('#user_id').val();
+            var number_product = $('#number_prd').val();
 
-            $.ajax({
-                type: "POST",
-                cache: false,
-                url: "{{url('/save-cart')}}",
-                data: {
-                    product_id_hidden: id,
-                    qty: qty,
-                    _token: _token
-                },
-                dataType: "html",
-                success: function(data) {
-                    alert('Thêm vào giỏ hàng thành công');
-                    console.log(data);
-                    $('#product_count').html(data);
-                }
-            });
-            return false;
+            if (user_id && number_product != 0) {
+                var qty = $('input.input-number').val();
+                var id = $(this).data('productid');
+                var _token = $("input[name='_token']").val();
+
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: "{{url('/save-cart')}}",
+                    data: {
+                        product_id_hidden: id,
+                        qty: qty,
+                        _token: _token
+                    },
+                    dataType: "html",
+                    success: function(data) {
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'success',
+                            title: 'Thêm vào giỏ hàng thành công',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+
+                        console.log(data);
+                        $('#product_count').html(data);
+                    }
+                });
+                return false;
+            } else if (number_product == 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Mặt hàng tạm thời ngừng kinh doanh !',
+
+                })
+
+                return false;
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Bạn cần đăng nhập để mua hàng !',
+
+                })
+
+                return false;
+            }
+
         });
+        
         // $('a.add-to-cart').click(function() {
         //     var qty = $('input.input-number').val();
         //     var id = $(this).data('productid');
@@ -650,59 +696,193 @@
             $("#send_coment").hide();
             $("#reply_coment").show();
             var id_comen = $(this).data('id_coment');
-
-            $("#reply_coment").val(id_comen);
-
+            var user_id = $(this).data('customer_id');
+            $("button[name=replycmt]").val(id_comen);
+            $("button[name=replycmt]").attr('data-customer_id', user_id);
             // $(this).data('name_coment') = $("#reply_coment").data('name_coment') ;
             // $('#reply_coment').data('name_coment', { foo: 'bar' });
             // $('#send_coment').attr('id','reply_coment'); 
             // document.getElementById('send_coment').id = 'reply_coment';
             // if (name == '' || coment == '') {
             //     alert('Cần điền đầy đủ thông tin');
+
             return false;
             // }
 
         });
         $(document).on('click', '#reply_coment', function() {
-            var name = $('#name').val();
-            var email = $('#email').val();
-            var phone = $('#number').val();
-            var coment = $('#message').val();
+            var user_id = $('#user_id').val();
+            if (user_id) {
+                var coment = $('#message').val();
+                var prd_id = $('.product_id').val();
+                var id_coment = $(this).val();
+                var customer_id = $(this).data('customer_id');
+                var _token = $('input[name=_token]').val();
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: "{{url('/reply-comment')}}",
+                    data: {
+
+                        product_id: prd_id,
+                        id_cus: customer_id,
+                        coment: coment,
+                        id_coment: id_coment,
+                        _token: _token
+                    },
+                    dataType: "html",
+                    success: function(data) {
+                        // alert('Thêm vào giỏ hàng thành công');
+                        $('#show_coment').html(data);
+                        // console.log(data);
+                        $('#tittle_coment').text('Post a comment');
+                        $("#send_coment").show();
+                        $("#reply_coment").hide();
+                        $("#name").val('');
+                        $("#email").val('');
+                        $("#number").val('');
+                        $("#message").val('');
+
+                        // alert(data)
+                        // $('#product_count').html(data);
+                    }
+                });
+                return false;
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Bạn cần đăng nhập để đăng bình luận !    ',
+                    footer: '<a href>Why do I have this issue?</a>'
+                })
+                // alert('Bạn cần đăng nhập để đăng bình luận !');
+            }
+
+
+        });
+        $(document).on('click', '.delete_coment', function() {
+            var user_id = $('#user_id').val();
+            if (user_id) {
+                var prd_id = $('.product_id').val();
+                var id_coment = $('.reply_btn').val();
+                var customer_id = $(this).data('customer_id');
+                var _token = $('input[name=_token]').val();
+          alert(id_coment);
+            }
+
+        });
+        // document.querySelector('#rating').addEventListener('click', function(e) {
+        //     let action = 'add';
+        //     var count = 0;
+        //     alert($(this).val());
+        //     for (const span of this.children) {
+
+        //         span.classList[action]('active');
+
+        //         if (span === e.target) {
+        //             action = 'remove';
+
+
+        //         }
+
+        //     }
+        //     alert(count)
+
+        // });
+
+        $('.stars a').on('click', function() {
+            var a = 0;
+
+            $('.stars span, .stars a').removeClass('active');
+
+
+            $(this).addClass('active');
+
+            $('.stars span').addClass('active');
+            //   a =$('.stars span').text();
+
+
+
+        });
+
+        $(document).on('click', '.stars a', function() {
+            var a = $(this).text();
+            $(".rating_btn").attr('data-rating_star', a);
+            return false;
+        });
+
+        $(document).on('click', '.rating_btn', function() {
+            var user_id = $('#user_id').val();
+            var ordered = $(this).data('ordered');;
+          
+            if (user_id && ordered > 0) {
+                var prd_id = $('.product_id').val();
+                var rating = $(this).data('rating_star');
+                var review = $("#review_rating").val();
+                var _token = $('input[name=_token]').val();
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: "{{url('/save-rating')}}",
+                    data: {
+                        rating: rating,
+                        prd_id: prd_id,
+                        review: review,
+                        _token: _token
+                    },
+                    dataType: "html",
+                    success: function(data) {
+                        // alert('Thêm vào giỏ hàng thành công');
+                        console.log(data);
+                        $('.review_list').html(data);
+                    }
+                });
+                return false;
+            } else if (ordered == 0 && user_id) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Hệ thống ghi nhận bạn chưa mua sản phẩm này !',
+                    footer: '<a href>Why do I have this issue?</a>'
+                })
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Bạn cần đăng nhập để đăng đánh giá !',
+                    footer: '<a href>Why do I have this issue?</a>'
+                })
+
+            }
+
+        });
+
+
+        function load_rating() {
             var prd_id = $('.product_id').val();
-            var id_coment = $(this).val();
-            var _token = $('input[name=_token]').val();
+            var _token = $("input[name='_token']").val();
             $.ajax({
                 type: "POST",
                 cache: false,
-                url: "{{url('/reply-comment')}}",
+                url: "{{url('/load-rating')}}",
                 data: {
-                    name: name,
-                    email: email,
-                    phone: phone,
                     product_id: prd_id,
-                    coment: coment,
-                    id_coment: id_coment,
+
                     _token: _token
+
+
                 },
                 dataType: "html",
                 success: function(data) {
-                    // alert('Thêm vào giỏ hàng thành công');
-                    $('#show_coment').html(data);
-                    $('#tittle_coment').text('Post a comment');
-                    $("#send_coment").show();
-                    $("#reply_coment").hide();
-                    $("#name").val('');
-                    $("#email").val('');
-                    $("#number").val('');
-                    $("#message").val('');
+                    console.log(data);
+                    $('.review_list').html(data);
 
-                    // alert(data)
-                    // $('#product_count').html(data);
+
                 }
             });
-            return false;
+        }
 
-        });
+
     });
 </script>
 

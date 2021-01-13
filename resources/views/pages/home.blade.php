@@ -10,12 +10,14 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-xl-6 col-lg-8 col-md-8">
-                            <div class="hero__caption">
-                                <span>Giảm giá 70% </span>
-                                <h1 data-animation="fadeInUp" data-delay=".4s" style="font-family:Serif,arial,helvetica;">
-                                    Nội thất với giá siêu rẻ</h1>
-                                <p data-animation="fadeInUp" data-delay=".6s">Luôn mang đến cho bạn không gian gia đình ấm cúng..một nơi
-                                    hoàn hảo để trở về với những người yêu thương. </p>
+                            <div class="hero__caption">          
+                                <!-- <span>Giảm giá 70% </span> -->
+                                @foreach($content_slider as $itemm)
+                                <h1 data-animation="fadeInUp" data-delay=".4s" style="font-family:Serif,arial,helvetica; color: black;">
+                                  {!!  $itemm->content_header_index !!}</h1>
+                                    @endforeach
+                                <!-- <p data-animation="fadeInUp" data-delay=".6s">Luôn mang đến cho bạn không gian gia đình ấm cúng..một nơi
+                                    hoàn hảo để trở về với những người yêu thương. </p> -->
                                 <!-- Hero-btn -->
                                 <div class="hero__btn" data-animation="fadeInUp" data-delay=".7s">
                                     <a href="{{ URL::to('/san-pham') }}" class="btn hero-btn">Khám phá ngay</a>
@@ -27,6 +29,11 @@
             </div>
         </div>
     </div>
+    <!-- <span>Giảm giá 70% </span>
+                                <h1 data-animation="fadeInUp" data-delay=".4s" style="font-family:Serif,arial,helvetica;">
+                                    Nội thất với giá siêu rẻ</h1>
+                                <p data-animation="fadeInUp" data-delay=".6s">Luôn mang đến cho bạn không gian gia đình ấm cúng..một nơi
+                                    hoàn hảo để trở về với những người yêu thương. </p> -->
     <!-- slider Area End-->
     <!--? Properties Start -->
     <section class="properties new-arrival fix">
@@ -35,9 +42,10 @@
             <div class="row justify-content-center">
                 <div class="col-xl-7 col-lg-8 col-md-10">
                     <div class="section-tittle mb-60 text-center wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
-                        <h2>Sản phẩm mới nhất</h2>
-                        <P>Phong cách nội thất sang trọng..tinh tế thể hiện đẳng cấp của bạn...đến với chúng tôi và bạn sẽ không bao giờ hối hận
-                            về lựa chọn của mình</P>
+                        <!-- <h2>Sản phẩm mới nhất</h2> -->
+                        @foreach($content_slider as $itemm)
+                        <P> {!!  $itemm->intro_product !!} </P>
+                            @endforeach
                     </div>
                 </div>
             </div>
@@ -299,13 +307,12 @@
         <div class="tailor-offers"></div>
         <!-- left Contents -->
         <div class="tailor-details">
-            <h2>Nội thất hiện đại<br> tỏa sáng mọi không gian</h2>
+            <!-- <h2>Nội thất hiện đại<br> tỏa sáng mọi không gian</h2>
             <p>Khởi nguồn từ 1999 với ý tưởng tạo ra sự khác biệt và gu thẩm mỹ Tinh Tế,
-                 chúng tôi đã trở thành và giữ vững vị trí thương hiệu nội thất hàng đầu Việt Nam.</p>
-            <p class="pera-bottom"> Một quá trình dài của sự tìm tòi và đầy cảm hứng, chúng tôi đã thiết kế và 
-                sản xuất ra những sản phẩm nội thất hợp thời và độc đáo, kết hợp với quá trình chọn lọc kỹ lưỡng những món
-                 đồ trang trí để tạo nên không gian sống hài hòa, Tinh Tế và sang trọng. Nội thất Nhà Xinh chính là sự lựa chọn 
-                 của những người Tinh Tế.</p>
+                 chúng tôi đã trở thành và giữ vững vị trí thương hiệu nội thất hàng đầu Việt Nam.</p> -->
+                 @foreach($content_slider as $itemm)
+            <p class="pera-bottom"> {!! $itemm->content_footer_index !!}</p>
+                 @endforeach
             <a href="#" class="btn">Khám phá</a>
         </div>
 

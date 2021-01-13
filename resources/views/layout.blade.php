@@ -27,16 +27,89 @@
     <link rel="stylesheet" href="{{ URL::asset('public/frontend/assets/css/slick.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('public/frontend/assets/css/nice-select.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('public/frontend/assets/css/style.css') }}">
-   <style>
-   label.error{
-       color: red;
-   }
+    @stack('nice-select')
+    <style>
+        label.error {
+            color: red;
 
-   </style>
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Poppins",sans-serif;
+            background-color: #fafafa
+        }
+
+        .price-range-block {
+            margin: 60px;
+        }
+
+        .sliderText {
+            width: 40%;
+            margin-bottom: 30px;
+            border-bottom: 2px solid red;
+            padding: 10px 0 10px 0px;
+            font-weight: bold;
+        }
+
+        .ui-slider-horizontal {
+            height: .6em;
+        }
+
+        .ui-slider-horizontal {
+            margin-bottom: 15px;
+            width: 40%;
+        }
+
+        .ui-widget-header {
+            background: #e6a5a5;
+        }
+
+        .price-range-search {
+            width: 40.5%;
+            background-color: #f9f9f9;
+            border: 1px solid #6e6666;
+            min-width: 40%;
+            display: inline-block;
+            height: 32px;
+            border-radius: 5px;
+            float: left;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .price-range-field {
+            width: 20%;
+            min-width: 16%;
+            background-color: #f9f9f9;
+            border: 1px solid #6e6666;
+            color: black;
+            font-family: myFont;
+            font: normal 14px Arial, Helvetica, sans-serif;
+            border-radius: 5px;
+            height: 26px;
+            padding: 5px;
+        }
+
+        .search-results-block {
+            position: relative;
+            display: block;
+            clear: both;
+        }
+
+        .btn-search {
+            background-color: #e6a98e;
+            color: #3a054b;
+            font-size: 25px;
+            font-weight: 700;
+
+        }
+    </style>
 
 </head>
 
 <body>
+    <input type="hidden" name="get_url" value="{{ url('/') }}">
     <!-- ? Preloader Start -->
     <div id="preloader-active">
         <div class="preloader d-flex align-items-center justify-content-center">
@@ -71,23 +144,14 @@
                                         <li><a href="{{ URL::to('/trang-chu') }}">Home</a></li>
                                         <li><a href="{{ URL::to('/san-pham') }}">Product</a></li>
                                         <li><a href="{{URL::to('/trang-chi-tiet')}}">About</a></li>
-                                        <li><a href="#">Page</a>
-                                            <ul class="submenu">
-                                                @php
-                                                $account = Session::get('customer_name');
-                                                @endphp
-                                                @if ($account)
-                                                <li><a href="{{ URL::to('/logout-checkout') }}">Logout</a></li>
-                                                @else
-                                                <li><a href="{{ URL::to('/login-checkout') }}">Login</a></li>
-                                                @endif
+                                        <li><a href="{{ URL::to('/tin-tuc') }}">News</a>
 
-                                                <li><a href="{{ URL::to('/show-cart') }}">Card</a></li>
-                                                <!-- <li><a href="categories.html">Categories</a></li>
+                                            <!-- <li><a href="categories.html">Categories</a></li>
                                                 <li><a href="checkout.html">Checkout</a></li>
                                                 <li><a href="product_details.html">Product Details</a></li> -->
-                                            </ul>
+
                                         </li>
+
                                         <!-- <li><a href="blog.html">Blog</a>
                                             <ul class="submenu">
                                                 <li><a href="blog.html">Blog</a></li>
@@ -96,6 +160,13 @@
                                             </ul>
                                         </li> -->
                                         <li><a href="{{URL::to('/lien-he')}}">Contact</a></li>
+                                        <li><a href="blog.html">Personal</a>
+                                            <ul class="submenu">
+                                                <li><a href="{{URL::to('/personal-info')}}">My profile</a></li>
+                                                <li><a href="{{URL::to('/info-shipping')}}">My order</a></li>
+
+                                            </ul>
+                                        </li>
                                     </ul>
                                 </nav>
                             </div>
@@ -107,22 +178,39 @@
                                         <!-- Search Box -->
                                         <form action="{{URL::to('/search-product')}}" class="form-box f-right " method="get">
 
-                                            <input type="text" name="Search" placeholder="Search products" required>
+                                            <input style="font-family: Poppins,sans-serif;" type="text" name="Search" placeholder="Search products" required>
                                             <div class="search-icon">
-                                                <button class=" btn " type="submit"> <i class="ti-search"></i></button>
+                                                <button style="border-radius: 10px; padding: 15px 20px;" class=" btn " type="submit"> <i class="ti-search"></i></button>
                                             </div>
                                         </form>
                                     </li>
-                                    <li>
+                                    <!-- <li><a href="#">News</a>
+                                            <ul class="submenu">
+                                                @php
+                                                $account = Session::get('customer_name');
+                                                @endphp
+                                                @if ($account)
+                                                <li><a href="{{ URL::to('/logout-checkout') }}">Logout</a></li>
+                                                @else
+                                                <li><a href="{{ URL::to('/login-checkout') }}">Login</a></li>
+                                                @endif
+
+                                                <li><a href="{{ URL::to('/show-cart') }}">Card</a></li>
+                                              
+                                            </ul>
+                                        </li> -->
+                                    <li style="font-family: Poppins,sans-serif;">
 
                                         @if ($account)
-                                        <a href="{{URL::to('/get-shipping')}}" class="account-btn name">{{ $account }}</a>
+                                        <a href="{{URL::to('/personal-info')}}" class="account-btn name">{{ $account }}</a>
                                         <a href="{{ URL::to('/logout-checkout') }}" class="account-btn">Logout</a>
                                         @else
                                         <a href="{{ URL::to('/login-checkout') }}" class="account-btn">Log in</a>
                                         @endif
 
                                     </li>
+
+
                                     <li>
                                         <div class="card-stor">
 
@@ -292,12 +380,100 @@
     <!-- Jquery Plugins, main Jquery -->
     <script src="{{ URL::asset('public/frontend/assets/js/plugins.js') }}"></script>
     <script src="{{ URL::asset('public/frontend/assets/js/main.js') }}"></script>
-   
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" type="text/css" media="all" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" type="text/javascript"></script> -->
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script> -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+
     @stack('ajax-add-cart')
     @stack('ajax-edit-cart')
     @stack('ajax-updatepage-cart')
     @stack('ajax-history-product')
     @stack('ajax-place')
+    <!-- <script>
+        $(document).ready(function() {
+
+            $('#price-range-submit').hide();
+
+            $("#min_price,#max_price").on('change', function() {
+
+                $('#price-range-submit').show();
+
+                var min_price_range = parseInt($("#min_price").val());
+
+                var max_price_range = parseInt($("#max_price").val());
+
+                if (min_price_range > max_price_range) {
+                    $('#max_price').val(min_price_range);
+                }
+
+                $("#slider-range").slider({
+                    values: [min_price_range, max_price_range]
+                });
+
+            });
+
+
+            $("#min_price,#max_price").on("paste keyup", function() {
+
+
+
+                var min_price_range = parseInt($("#min_price").val());
+
+                var max_price_range = parseInt($("#max_price").val());
+
+                if (min_price_range == max_price_range) {
+
+                    max_price_range = min_price_range + 100000;
+
+                    $("#min_price").val(min_price_range);
+                    $("#max_price").val(max_price_range);
+                }
+
+                $("#slider-range").slider({
+                    values: [min_price_range, max_price_range]
+                });
+
+            });
+
+
+            $(function() {
+                $("#slider-range").slider({
+                    range: true,
+                    orientation: "horizontal",
+                    min: 0,
+                    max: 10000000,
+                    values: [0, 10000000],
+                    step: 100000,
+
+                    slide: function(event, ui) {
+                        if (ui.values[0] == ui.values[1]) {
+                            return false;
+                        }
+
+                        $("#min_price").val(ui.values[0]);
+                        $("#max_price").val(ui.values[1]);
+                    }
+                });
+
+                $("#min_price").val($("#slider-range").slider("values", 0));
+                $("#max_price").val($("#slider-range").slider("values", 1));
+
+            });
+
+            $("#slider-range,#price-range-submit").click(function() {
+                $('#price-range-submit').show();
+                var min_price = $('#min_price').val();
+                var max_price = $('#max_price').val();
+
+                //   $("# ").text("Here List of products will be shown which are cost between " + min_price  +" "+ "and" + " "+ max_price + ".");
+            });
+
+        });
+    </script> -->
     <script>
         //   if ($('#validation').valid()) {
         //                 window.location.href = "{{ URL::to('info-shipping') }}";
@@ -323,13 +499,31 @@
                 if (a) {
                     window.location.href = "{{asset('/show-cart')}}";
                 } else {
-                    alert('Vui lòng đăng nhập để thực hiện thao tác này...')
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Vui lòng đăng nhập để thực hiện thao tác này...',
+                        footer: '<a href>Why do I have this issue?</a>'
+                    })
+
                 }
 
 
 
 
             });
+            $(".change_pass").click(function() {
+         $('.info').hide();
+         $('.change_pass').show();
+
+
+
+
+            });
+
+
+           
             $("form[name='validate_form']").validate({
 
 
@@ -340,9 +534,9 @@
                     },
                     phone: {
                         required: true,
-                        number :true,
+                        number: true,
                         minlength: 10
-                       
+
                     },
                     email: {
                         required: true,
@@ -363,7 +557,7 @@
                         required: "không được bỏ trống số điện thoại",
                         number: "số điện thoại không bao gồm kí tự",
                         minlength: "số điện thoại tối thiểu 10 số"
-                       
+
                     },
                     email: {
                         required: "không được bỏ trống email",
@@ -383,6 +577,7 @@
 
         });
     </script>
+
 
 
 

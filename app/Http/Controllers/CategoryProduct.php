@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
@@ -11,7 +12,7 @@ class CategoryProduct extends Controller
 {
     public function AuthLogin()
     {
-        $login = Session::get('admin_id');
+        $login = Auth::id();
         if ($login) {
             return Redirect::to('/dashboard');
         } else {
@@ -26,7 +27,8 @@ class CategoryProduct extends Controller
     public function all_category_product()
     {
         $this->AuthLogin();
-        $all = DB::table('tbl_category_product')->get();
+        $all = DB::table('tbl_category_product')->orderBy('tbl_category_product.category_id','desc')
+       ->paginate(6);
         $manager = view('admin.all_category_product')->with('all_category_product', $all);
         return view('admin_layout')->with('admin.all_category_product', $manager);
     }
@@ -82,6 +84,7 @@ class CategoryProduct extends Controller
     {
         $this->AuthLogin();
         DB::table('tbl_category_product')->where('category_id', $category_product_id)->delete();
+        DB::table('tbl_product')->where('category_id', $category_product_id)->delete();
         Session::put('message', 'Xoá danh mục sản phẩm thành công');
         return Redirect::to('/all-category-product');
     }
@@ -89,11 +92,21 @@ class CategoryProduct extends Controller
     //show in homepage
     public function show_category_home($category_id)
     {
+        $pages =0;
         $category_product = DB::table('tbl_category_product')->where('category_status', 1)->orderBy('category_id')->get();
         $brand_product = DB::table('tbl_brand')->where('brand_status', 1)->orderBy('brand_id')->get();
+        $content_slider =DB::table('tbl_slider_content')->get();
         $this_category = DB::table('tbl_category_product')->where('category_id', $category_id)->first()->category_id;
+       $this_brand =0;
         $all = DB::table('tbl_product')->join('tbl_category_product', 'tbl_product.category_id', '=', 'tbl_category_product.category_id')
-        ->where('tbl_category_product.category_id', $category_id)->paginate(9);
-        return view('pages.product.all_product')->with('category', $category_product)->with('brand', $brand_product)->with('product', $all)->with('this_category', $this_category);
+        ->join('tbl_product_img','tbl_product_img.product_id','=','tbl_product.product_id')->where('tbl_product_img.img_status',1)->where('tbl_category_product.category_id', $category_id)->paginate(6);
+        return view('pages.product.all_product')->with('category', $category_product)->with('brand', $brand_product)->with('content_slider',$content_slider)->with('product', $all)->with('this_category', $this_category)->with('this_brand',$this_brand);
+    }
+    public function search_catename(Request $request){
+        $this->AuthLogin();
+        $search_admin_product = DB::table('tbl_category_product')
+        ->where('category_status', 1)->where('category_name', 'like', '%' . $request->cate_name . '%')->paginate(6);
+        return view('admin.all_category_product')
+           ->with('all_category_product', $search_admin_product);
     }
 }

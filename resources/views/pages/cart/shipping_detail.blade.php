@@ -1,110 +1,121 @@
 @extends('layout')
 @section('content')
 
-<section class="checkout_area section-padding40">
+
+<section class="cart_area section-padding40">
+<?php
+
+use Illuminate\Support\Facades\Session;
+
+$message = Session::get('message');
+?>
+<span style="color: green; margin-left:150px;">
+    <?php
+    if ($message) {
+        echo $message;
+        Session::put('message', NULL);
+    }
+    ?>
+</span>
     <div class="container">
-        <div class="returning_customer">
-            <!-- <div class="check_title">
-                            <h2>
-                                Returning Customer?
-                                
-                                <a href="login.html">Click here to login</a>
-                            </h2>
-                        </div> -->
-            <!-- <p>
-                        If you have shopped with us before, please enter your details in the
-                        boxes below. If you are a new customer, please proceed to the
-                        Billing & Shipping section.
-                    </p> -->
-            <?php
-
-            use Illuminate\Support\Facades\Session;
-
-            $message = Session::get('message');
-            ?>
-            <span style="color: green;">
-                <?php
-                if ($message) {
-                    echo $message;
-                    Session::put('message', NULL);
-                }
-                ?>
-            </span>
-            <?php
-            $user = Session::get('customer_name');
-            $email = Session::get('customer_email');
-
-            ?>
-            <form class="row contact_form" action="#" method="post">
-
-                <div class="col-md-6 form-group p_star">
-                    <input type="text" class="form-control" id="name" name="name" value="<?php echo $user ?> " disabled />
-
-                </div>
-                <div class="col-md-6 form-group p_star">
-                    <input type="email" class="form-control" id="password" name="password" value="<?php echo $email ?>" disabled />
-
-                </div>
-
-
-            </form>
-            <?php
-            $count = Cart::count();
-            ?>
-             <?php
-           Session::put('a', 'abc');
-           Session::put('a', 'xyz');
-           $b =Session::get('a')
-            ?>
-            <input type="hidden" id="count_input" value="<?php echo $count ?> <?php echo $b ?>">
-        </div>
-    
-        <div class="cupon_area">
-            <div class="check_title">
-                <h1 style=" text-align: center; margin-bottom: 50px;">Lịch sử mua hàng</h1>
-
-            </div>
-            <!-- <input type="text" placeholder="Enter coupon code" /> -->
-
-            <div class="contain">
+        <div class="cart_inner">
+            <div class="table-responsive">
                 <form action="">
                     @csrf
-                    <table class="table table-striped">
+                    <table class="table">
                         <thead>
                             <tr>
-                                <th scope="col">ID đơn hàng</th>
+                                <th scope="col">Id đơn hàng</th>
                                 <th scope="col">Tổng tiền</th>
                                 <th scope="col">Ngày mua</th>
+                                <th scope="col">Tình trang đơn</th>
+                                <th scope="col"></th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="data-cart" id="content_cart">
+
+                            @foreach ($list_order as $item)
                             <tr>
-                                @foreach($list_order as $item)
-                                <th scope="row"><span id="display_history">{{ $item->order_id }}</span></th>
-                                <td>{{ $item->order_total }} VNĐ</td>
-                                <td>{{ $item->created_at }} </td>
+                                <td id="display_history">
+                                    <div class="media">
+
+                                        <div class="media-body">
+                                            <p>{{ $item->order_id }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <h5><span class="p-price">{{ $item->order_total }} </span> VNĐ</h5>
+                                </td>
+                                <td>
+                                    <div class="product_count">
+                                        {{ $item->created_at }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <h5 class="p-total">{{ $item->status }}</h5>
+                                </td>
+                                <td>
+                                    <?php
+                                    if ($item->status == 'đang vận chuyển') {
+                                        echo '
+                                 <a style="border-radius: 10px; padding: 15px 20px;" href="' . url('confirm-order/' . $item->order_id) . '" class="btn btn-outline-danger btn-sm ">
+                                 Đã nhận hàng <i class="fas fa-check-circle"></i>
+                                 </a>
+                                  ';
+                                    }elseif($item->status == 'chờ xác nhận'){
+                                    echo '
+                                    <a style="border-radius: 10px; padding: 15px 20px;" href="' . url('cancel-order/' . $item->order_id) . '" class="btn btn-outline-danger btn-sm ">
+                                    Huỷ đơn hàng <i class="fas fa-check-circle"></i>
+                                    </a>
+                                    ';
+                                    }
+                                    elseif($item->status == 'huỷ đơn'){
+                                        echo '
+                                        <a style="border-radius: 10px; padding: 15px 20px;" href="#" class="btn btn-outline-danger btn-sm ">
+                                       Đơn đã bị huỷ <i class="fas fa-check-circle"></i>
+                                        </a>
+                                        ';
+                                        }else{
+                                            echo '
+                                        <a style="border-radius: 10px; padding: 15px 20px;" href="#" class="btn btn-outline-danger btn-sm ">
+                                      Đơn đã nhận<i class="fas fa-check-circle"></i>
+                                        </a>
+                                        ';
+                                        }
+                                    ?>
+                                </td>
+                            </tr>
+                            @endforeach
+
+                            <tr class="bottom_button">
+                                <td>
+                                    <a class="btn" href="{{URL::to('/trang-chu')}}">Tiếp tục mua sắm</a>
+                                </td>
 
 
                             </tr>
-                            @endforeach
+
+
                         </tbody>
+                        
                     </table>
-                </form>
-                <a class="btn" href="{{URL::to('/trang-chu')}}">Tiếp tục mua sắm</a>
+                    <div class="row justify-content-center">
+                
+
+                <span>{!! $list_order->render('vendor.pagination.name') !!}</span>
 
             </div>
+                </form>
 
-           
-
-        </div>
-        <div class="billing_details">
-
+            </div>
         </div>
     </div>
 </section>
 @push('ajax-edit-cart')
 <script>
-    $('#display_history').click(function() {
+    $(document).on('click', '#display_history', function() {
+
         var order_id = $(this).text();
         var _token = $("input[name='_token']").val();
         $.ajax({
@@ -117,13 +128,13 @@
             },
             dataType: "html",
             success: function(data) {
-                $('.contain').html(data);
+                $('.cart_inner').html(data);
 
             }
         });
         return false;
+
     });
-   
 </script>
 
 @endpush

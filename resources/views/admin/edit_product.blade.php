@@ -57,17 +57,18 @@
                                     <Textarea style="resize: none" rows="8" class="form-control" id="editor1"
                                         name="product_content">{{ $item->product_content }}</Textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label for="exampleInputEmail1">Ảnh sản phẩm</label>
-                                    <input type="file" class="form-control" id="exampleInputEmail1" name="product_image">
-                                    <img src="{{ URL::to('public/uploads/product/' . $item->product_image) }}"
-                                        style="width: 300px" alt="">
-                                </div>
+                               
                                 <div class="form-group">
                                     <label for="exampleInputEmail1">Giá sản phẩm</label>
                                     <input type="text" class="form-control" id="exampleInputEmail1"
                                         placeholder="Enter email" name="product_price" required
                                         value="{{ $item->product_price }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1">Số lượng trong kho</label>
+                                    <input type="text" class="form-control" id="exampleInputEmail1"
+                                        placeholder="Enter email" name="number_product" required
+                                        value="{{ $item->number_product }}">
                                 </div>
                                 <div class="form-group">
                                     <label for="exampleInputFile">Hiển thị</label>

@@ -30,14 +30,17 @@ use Illuminate\Support\Facades\Session;
             </div>
             <div class="col-sm-4">
             </div>
-            <div class="col-sm-3">
+           <form action="search-admin-product" method="get">
+               @csrf
+           <div class="col-sm-3">
                 <div class="input-group">
-                    <input type="text" class="input-sm form-control" placeholder="Search">
+                    <input type="text" class="input-sm form-control" name="admin_product" placeholder="Search" required>
                     <span class="input-group-btn">
-                        <button class="btn btn-sm btn-default" type="button">Go!</button>
+                        <button class="btn btn-sm btn-default" type="submit">Go!</button>
                     </span>
                 </div>
             </div>
+           </form>
         </div>
         <div class="table-responsive">
             <table class="table table-striped b-t b-light">
@@ -53,6 +56,7 @@ use Illuminate\Support\Facades\Session;
                         <th>Danh mục</th>
                         <th>Thương hiệu</th>
                         <th>Giá</th>
+                        <th>Số lượng</th>
                         <th>Mô tả</th>
                         <th>Nội dung</th>
                         <th>Tình trạng</th>
@@ -70,6 +74,7 @@ use Illuminate\Support\Facades\Session;
                         <td>{{ $cate_pro->category_name }}</td>
                         <td>{{ $cate_pro->brand_name }}</td>
                         <td>{{ $cate_pro->product_price }}</td>
+                        <td>{{ $cate_pro->number_product }}</td>
                         <td>{!! $cate_pro->product_desc !!}</td>
                         <td>{!! $cate_pro->product_content !!}</td>
                         <td>

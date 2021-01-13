@@ -27,7 +27,19 @@
     <link rel="stylesheet" href="{{ URL::asset('public/frontend/assets/css/slick.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('public/frontend/assets/css/nice-select.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('public/frontend/assets/css/style.css') }}">
+    <style>
+        .social a img {
+            width: 50px;
+        }
+
+        .social .sociallg img:hover {
+            width: 60px;
+            transition-delay: 0.1s;
+            transition-duration: 0.8s;
+        }
+    </style>
 </head>
+
 
 <body>
     <!-- ? Preloader Start -->
@@ -74,13 +86,16 @@
                                     </div>
                                     <div class="single-input-fields">
                                         <label>Password</label>
-                                        <input type="password" placeholder="Enter Password" required
-                                            name="password_account">
+                                        <input type="password" placeholder="Enter Password" required name="password_account">
                                     </div>
                                     <div class="single-input-fields login-check">
                                         <input type="checkbox" id="fruit1" name="keep-log">
                                         <label for="fruit1">Keep me logged in</label>
                                         <a href="#" class="f-right">Forgot Password?</a>
+                                    </div>
+                                    <div class="single-input-fields social">
+                                        <a class="sociallg" href="{{URL::to('/login-facebook')}}"> <img src="{{asset('public/frontend/assets/img/logo/logofacebook.png')}}" alt=""></a>
+                                        <a class="sociallg" href="{{URL::to('/login-google')}}"> <img src="{{asset('public/frontend/assets/img/logo/logogoogle.png')}}" alt=""></a>
                                     </div>
                                 </div>
                                 <!-- form Footer -->

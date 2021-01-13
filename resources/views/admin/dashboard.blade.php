@@ -3,7 +3,7 @@
 
     <!-- //market-->
     <div class="market-updates">
-        <div class="col-md-3 market-update-gd">
+        <!-- <div class="col-md-3 market-update-gd">
             <div class="market-update-block clr-block-2">
                 <div class="col-md-4 market-update-right">
                     <i class="fa fa-eye"> </i>
@@ -28,6 +28,32 @@
                 </div>
                 <div class="clearfix"> </div>
             </div>
+        </div> -->
+        <div class="col-md-3 market-update-gd">
+            <div class="market-update-block clr-block-2">
+                <div class="col-md-4 market-update-right">
+                <i class="fa fa-usd"></i>
+                </div>
+                <div class="col-md-8 market-update-left">
+                    <h4>sales today</h4>
+                    <h4 id="get_sales_today">13,500</h4>
+                    <p>Other hand, we denounce</p>
+                </div>
+                <div class="clearfix"> </div>
+            </div>
+        </div>
+        <div class="col-md-3 market-update-gd">
+            <div class="market-update-block clr-block-1">
+                <div class="col-md-4 market-update-right">
+                <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                </div>
+                <div class="col-md-8 market-update-left">
+                    <h4>Order today</h4>
+                    <h3 id="get_order_today">1,250</h3>
+                    <p>Other hand, we denounce</p>
+                </div>
+                <div class="clearfix"> </div>
+            </div>
         </div>
         <div class="col-md-3 market-update-gd">
             <div class="market-update-block clr-block-3">
@@ -36,7 +62,7 @@
                 </div>
                 <div class="col-md-8 market-update-left">
                     <h4>Sales</h4>
-                    <h3>1,500</h3>
+                    <h4 id="get_sales">1,500 VNĐ</h4>
                     <p>Other hand, we denounce</p>
                 </div>
                 <div class="clearfix"> </div>
@@ -49,7 +75,7 @@
                 </div>
                 <div class="col-md-8 market-update-left">
                     <h4>Orders</h4>
-                    <h3>1,500</h3>
+                    <h3 id="get_order">1,500 Đơn</h3>
                     <p>Other hand, we denounce</p>
                 </div>
                 <div class="clearfix"> </div>
@@ -65,7 +91,26 @@
                 <div class="agileinfo-grap">
                     <div class="agileits-box">
                         <header class="agileits-box-header clearfix">
+                           
                             <h3>Visitor Statistics</h3>
+                           <form action="">
+                               @csrf
+                               <label for="datepicker">Từ ngày</label>
+                            <input type="text" id="datepicker" name="date_from">
+                            <label for="datepicker">Đến ngày</label>
+                            <input type="text" id="datepicker2" name="date_to">
+                            <button id="btn-dasboard-filter">Lọc </button>
+                           </form>
+                          
+                               <label for="select">lọc theo:</label>
+                               <select class="dasboard-filter form-control" id="" style="width: 10%;">
+                               <option>--chọn--</option>
+                                   <option value="7ngay">7 ngày qua</option>
+                                   <option value="thangtruoc">tháng trước</option>
+                                   <option value="thangnay">tháng này</option>
+                                   <option value="365ngayqua">365 ngày qua</option>
+                               </select>
+                          
                             <div class="toolbar">
 
 

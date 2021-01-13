@@ -45,12 +45,18 @@
                             </div>
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Ảnh sản phẩm</label>
-                                <input type="file" class="form-control" id="exampleInputEmail1" name="product_image" required>
+                                <input type="file" class="form-control" id="exampleInputEmail1" name="product_image[]"  multiple = "true " accept="image/*" required>
+                             
                             </div>
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Giá sản phẩm</label>
                                 <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email"
                                     name="product_price" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Số lượng trong kho</label>
+                                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter email"
+                                    name="number_product" required>
                             </div>
                             <div class="form-group">
                                 <label for="exampleInputFile">Hiển thị</label>

@@ -35,7 +35,7 @@ class DemoEmail extends Mailable
      */
     public function build()
     {
-        return $this->from('lvtan.19it1@vku.udn.vn')->subject("Đặt hàng thành công. Shop VanTan ^-^")
+        return $this->from('dqtai.19it1@vku.udn.vn')->subject("Mail from FURN")
             ->view('admin.send_mail');
             // ->text('admin.text_mail')
             // ->with(

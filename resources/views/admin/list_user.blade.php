@@ -53,6 +53,7 @@ use Illuminate\Support\Facades\Session;
                         <th>email</th>
                         <th>Mật khẩu</th>
                         <th>Số điện thoại</th>
+                        <th>Tình trạng</th>
                         <th style="width:30px;"></th>
                     </tr>
                 </thead>
@@ -66,6 +67,13 @@ use Illuminate\Support\Facades\Session;
                         <td>{{ $list_userr->customer_email }}</td>
                         <td>{{ $list_userr->customer_password }}</td>
                         <td>{!! $list_userr->customer_phone !!}</td>
+                        <td><?php
+                        if($list_userr->lock_customer==1){
+                            echo 'Đang bị khoá';
+                        }else{
+                            echo 'Bình thường'; 
+                        }
+                        ?></td>
                         
 
                         <td>

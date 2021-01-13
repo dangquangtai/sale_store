@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Cart;
+use Gloudemans\Shoppingcart\Facades\Cart;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use PhpParser\Node\Stmt\TryCatch;
 
 class CartController extends Controller
 {
@@ -14,16 +16,21 @@ class CartController extends Controller
     {
         $product_id = $request->product_id_hidden;
         $quantity = $request->qty;
-        $product_info = DB::table('tbl_product')->where('product_id', $product_id)->first();
-        $data['id'] = $product_info->product_id;
+        $product_info = DB::table('tbl_product')
+            ->join('tbl_product_img', 'tbl_product_img.product_id', '=', 'tbl_product.product_id')->where('tbl_product_img.img_status', 1)->where('tbl_product.product_id',$product_id)->get();
+        // $product_info = $get_product_info->first();
         $data['qty'] = $quantity;
-        $data['name'] = $product_info->product_name;
-        $data['price'] = $product_info->product_price;
-        $data['options']['image'] = $product_info->product_image;
         $data['weight'] = "123";
+        foreach ($product_info as $item) {
+            $data['id'] = $item->product_id;
+            $data['name'] = $item->product_name;
+            $data['price'] = $item->product_price;
+            $data['options']['image'] = $item->product_image;
+        }
         Cart::add($data);
         $count = Cart::content()->count();
         echo $count;
+
         // return Redirect::to('/show-cart');
     }
 
@@ -57,22 +64,21 @@ class CartController extends Controller
     }
     public function delete_cart_product(Request $request)
     {
-        $load='';
+        $load = '';
         $rowId = $request->rowId;
         Cart::remove($rowId);
         $count = Cart::content()->count();
         $toltal = Cart::subtotal();
-       
 
-            $load .= '
+
+        $load .= '
           
-            <input type="hidden" id ="retotal" value='.$toltal.'>
-            <input type="hidden" id ="recount" value='.$count.'>
+            <input type="hidden" id ="retotal" value=' . $toltal . '>
+            <input type="hidden" id ="recount" value=' . $count . '>
 
 ';
-       
-    
-      echo $load;
-     
+
+
+        echo $load;
     }
 }
